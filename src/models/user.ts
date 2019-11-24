@@ -1,6 +1,7 @@
 import { Table, Column, Model, HasMany } from 'sequelize-typescript';
 
 import { Token } from './token';
+import { Bookmark } from './bookmark';
 
 export interface UserShape {
   email: string;
@@ -9,12 +10,21 @@ export interface UserShape {
 
 @Table({ timestamps: true })
 export class User extends Model<User> implements UserShape {
+  // --------------------------------------------
+  // COLUMNS
+  // --------------------------------------------
   @Column({ primaryKey: true })
   email!: string;
 
   @Column
   password!: string;
 
+  // --------------------------------------------
+  // DERIVED FIELDS
+  // --------------------------------------------
   @HasMany(() => Token)
   tokens!: Token[];
+
+  @HasMany(() => Bookmark)
+  bookmarks!: Bookmark[];
 }

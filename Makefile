@@ -4,8 +4,4 @@ build:
 
 .PHONY: run
 run:
-	docker run --rm -p 3000-4000:3000 --name bookmarks-backend --link peaceful_ishizaka bookmarks-backend:latest
-
-.PHONY: up
-up:
-	docker-compose up
+	docker run --rm -d -p 3000:3000 --name bookmarks-backend bookmarks-backend:latest

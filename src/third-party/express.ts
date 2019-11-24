@@ -3,26 +3,8 @@ import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 
-import * as errors from '../utils/errors';
 import { router } from '../routes';
-
-export const errorMiddleware = (
-  err: Error,
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction,
-) => {
-  let statusCode: number = 500;
-  let message: string = 'Something went wrong! Please try again.';
-
-  if (err instanceof errors.ClientError) {
-    statusCode = err.statusCode;
-    message = err.message;
-  }
-
-  console.log(err);
-  return res.status(statusCode).send({ error: message });
-};
+import { errorMiddleware } from '../middleware/error';
 
 const registerMiddleware = (app: express.Application) => {
   // Enable compression
@@ -47,6 +29,5 @@ export const createApp = (): express.Application => {
   app.set('PORT', port);
 
   registerMiddleware(app);
-
   return app;
 };

@@ -10,10 +10,9 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const user = await userService.createUser({ email, password });
     const token = await tokenService.createToken(user.email);
-    const message = 'Successfully created user!';
 
-    return res.status(201).send({
-      message,
+    return res.status(201).json({
+      message: 'Successfully signed up!',
       user,
       token,
     });
@@ -29,7 +28,12 @@ export const signin = async (req: Request, res: Response, next: NextFunction) =>
   try {
     const user = await userService.findUserByCredentials(email, password);
     const token = await tokenService.createToken(user.email);
-    return res.status(200).send({ user, token });
+
+    return res.status(200).json({
+      message: 'Successfully signed in!',
+      user,
+      token,
+    });
   } catch (err) {
     return next(err);
   }
