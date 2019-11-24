@@ -1,1 +1,1 @@
-# Authentication Service for a Hasura Application
+# Backend API for a bookmarks application
