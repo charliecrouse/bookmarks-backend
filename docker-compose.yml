@@ -13,6 +13,7 @@ services:
       - NODE_ENV=${NODE_ENV}
     depends_on:
       - postgres
+    container_name: bookmarks-backend
   postgres:
     image: postgres:alpine
     restart: always
@@ -24,5 +25,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=""
       - POSTGRES_DB=postgres
+    container_name: bookmarks-postgres
 volumes:
   postgres-data:
