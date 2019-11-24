@@ -100,10 +100,7 @@ export const updateBookmark = async (
   return bookmark;
 };
 
-export const deleteOwnedBookmarkAndChildren = async (
-  id: number,
-  ownerEmail: string,
-): Promise<number[]> => {
+export const deleteOwnedBookmarkAndChildren = async (id: number, ownerEmail: string) => {
   const bookmark = await findOwnedBookmark(id, ownerEmail);
 
   const children = await Bookmark.findAll({
@@ -113,13 +110,7 @@ export const deleteOwnedBookmarkAndChildren = async (
     },
   });
 
-  const ids = children.map(child => child.id);
-  const promises = children.map(child => child.destroy());
-
-  ids.push(bookmark.id);
-
+  const promises = children.map(child => deleteOwnedBookmarkAndChildren(child.id, ownerEmail));
   await Promise.all(promises);
-  await bookmark.destroy();
-
-  return ids;
+  return await bookmark.destroy();
 };
