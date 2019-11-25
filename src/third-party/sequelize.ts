@@ -3,15 +3,10 @@ import { Bookmark } from '../models/bookmark';
 import { Token } from '../models/token';
 import { User } from '../models/user';
 
-export const createDatabaseConnection = (): Sequelize => {
-  /*
-  const sequelize = new Sequelize('bookmarks-postgres', 'postgres', '', {
-    dialect: 'postgres',
-    logging: false,
-  });
-  */
+const DOCKER = (process.env.DOCKER || "false").toLowerCase() === "true"
 
-  const host = process.env.NODE_ENV === 'production' ? 'bookmarks-postgres' : '0.0.0.0';
+export const createDatabaseConnection = (): Sequelize => {
+  const host = DOCKER ? 'bookmarks-postgres' : '0.0.0.0';
 
   const sequelize = new Sequelize({
     host,

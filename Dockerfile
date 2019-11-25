@@ -91,11 +91,13 @@ FROM node:${NODE_VERSION}
 # -----------------
 ARG APP_NAME
 ARG NODE_ENV
+ARG PORT
 
 # -----------------------------
 # Stage 2 Environment Variables
 # -----------------------------
 ENV APP_DIR=/${APP_NAME}
+ENV DOCKER=true
 ENV NODE_ENV=${NODE_ENV}
 ENV PORT=3000
 
@@ -128,7 +130,7 @@ COPY . .
 # Stage 2, Layer 4: Health check
 # ------------------------------
 HEALTHCHECK --interval=5m --timeout=3s \
-  CMD curl -f http://localhost:3000/healthcheck || exit 1
+  CMD curl -f http://localhost:${PORT}/healthcheck || exit 1
 
 # ---------------------------------
 # Stage 2, Layer 5: Run application
