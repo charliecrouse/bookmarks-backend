@@ -10,7 +10,8 @@
     "dev": "nodemon",
     "lint": "eslint --fix --ext js,ts .",
     "start": "node ./build/index.js",
-    "prebuild": "yarn clean"
+    "prebuild": "yarn clean",
+    "prestart": "yarn build"
   },
   "dependencies": {
     "@babel/polyfill": "^7.7.0",
