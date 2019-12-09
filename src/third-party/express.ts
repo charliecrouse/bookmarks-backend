@@ -1,7 +1,12 @@
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+
+import bodyParser from 'body-parser';
 import cors from 'cors';
 import express from 'express';
+import https from 'https';
 import morgan from 'morgan';
-import bodyParser from 'body-parser';
 import compression from 'compression';
 
 import { router } from '../routes';
@@ -26,12 +31,27 @@ const registerMiddleware = (app: express.Application): void => {
   app.use(errorMiddleware);
 };
 
-export const createApp = (): express.Application => {
+export const getPort = (): number => {
+  return parseInt(process.env.PORT || '3000');
+};
+
+export const createApp = (): https.Server => {
   const app = express();
 
-  const port: number = parseInt(process.env.PORT || '3000');
-  app.set('PORT', port);
-
   registerMiddleware(app);
-  return app;
+
+  const sslPath = path.join(os.homedir(), '.config', 'ssl');
+  const sslCertPath = path.join(sslPath, 'server.cert');
+  const sslKeyPath = path.join(sslPath, 'server.key');
+
+  const cert = fs.readFileSync(sslCertPath, 'utf8');
+  const key = fs.readFileSync(sslKeyPath, 'utf8');
+
+  return https.createServer(
+    {
+      cert,
+      key,
+    },
+    app,
+  );
 };

@@ -1,7 +1,7 @@
 import '@babel/polyfill';
 import 'reflect-metadata';
 
-import { createApp } from './third-party/express';
+import { createApp, getPort } from './third-party/express';
 import { createDatabaseConnection } from './third-party/sequelize';
 
 const main = async () => {
@@ -12,7 +12,7 @@ const main = async () => {
 
   // Start express server
   const app = createApp();
-  const port = app.get('PORT');
+  const port = getPort();
 
   await app.listen(port);
   console.log(`Express server is listening at http://localhost:${port}`);
