@@ -22,7 +22,7 @@ export class Bookmark extends Model<Bookmark> implements BookmarkShape {
   // RELATIONS
   // --------------------------------------------
   @ForeignKey(() => Bookmark)
-  parent?: Bookmark;
+  parent?: number;
 
   @ForeignKey(() => User)
   ownerEmail!: string;

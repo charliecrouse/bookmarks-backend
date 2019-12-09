@@ -1,7 +1,6 @@
 import { NextFunction, Response, Request, Router } from 'express';
 
 import * as bookmarkService from '../../services/bookmark';
-
 import { authMiddleware } from '../../middleware/auth';
 import { User } from '../../models/user';
 
@@ -22,12 +21,12 @@ export const getBookmarks = async (req: Request, res: Response, next: NextFuncti
 export const createBookmark = async (req: Request, res: Response, next: NextFunction) => {
   const name: string = req.body.name;
   const url: string | null = req.body.url || null;
-  const parentId: number | null = req.body.parentId ?? null;
+  const parent: number | null = req.body.parent || null;
 
   const user: User = req.body.user;
 
   try {
-    const bookmark = await bookmarkService.createBookmark(user.email, parentId, { name, url });
+    const bookmark = await bookmarkService.createOwnedBookmark(user.email, parent, { name, url });
     return res.status(201).json({
       message: 'Successfully created new bookmark!',
       bookmark,
@@ -58,11 +57,11 @@ export const updateBookmark = async (req: Request, res: Response, next: NextFunc
 
   try {
     const id = parseInt(req.params.id);
-    const bookmark = await bookmarkService.updateBookmark(id, user.email, req.body);
+    await bookmarkService.updateOwnedBookmark(id, user.email, req.body);
 
     return res.status(202).json({
       message: 'Successfully updated bookmark!',
-      bookmark,
+      bookmark: await bookmarkService.findOwnedBookmark(id, user.email),
     });
   } catch (err) {
     return next(err);
@@ -74,7 +73,7 @@ export const deleteBookmark = async (req: Request, res: Response, next: NextFunc
 
   try {
     const id = parseInt(req.params.id);
-    const ids = await bookmarkService.deleteOwnedBookmarkAndChildren(id, user.email);
+    const ids = await bookmarkService.deleteOwnedBookmark(id, user.email);
 
     return res.status(204).json({
       message: 'Successfully deleted bookmarks!',

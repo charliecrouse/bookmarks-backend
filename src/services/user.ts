@@ -1,3 +1,5 @@
+import * as validator from 'validator';
+
 import * as crypto from '../utils/crypto';
 import * as errors from '../utils/errors';
 
@@ -12,6 +14,11 @@ export const createUser = async ({ email, password }: UserShape): Promise<User> 
       `A user already exists with the given email, ${email}`,
       400,
     );
+    return Promise.reject(error);
+  }
+
+  if (!validator.isEmail(email)) {
+    const error = new errors.ClientError(`The given email is invalid, ${email}!`, 400);
     return Promise.reject(error);
   }
 

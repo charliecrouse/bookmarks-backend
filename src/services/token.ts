@@ -7,7 +7,7 @@ import * as errors from '../utils/errors';
 
 import { Token } from '../models/token';
 
-export const createToken = async (ownerEmail: string, role: string = 'user'): Promise<Token> => {
+export const createToken = async (ownerEmail: string, role = 'user'): Promise<Token> => {
   await userService.findUserByEmail(ownerEmail);
 
   const secret = Token.getSecret();
