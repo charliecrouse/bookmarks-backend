@@ -8,8 +8,8 @@ export const errorMiddleware = (
   res: express.Response,
   next: express.NextFunction,
 ) => {
-  let statusCode: number = 500;
-  let message: string = 'Something went wrong! Please try again.';
+  let statusCode = 500;
+  let message = 'Something went wrong! Please try again.';
 
   if (err instanceof errors.ClientError) {
     statusCode = err.statusCode;
