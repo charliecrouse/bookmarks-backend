@@ -38,7 +38,7 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 # ==========================
-# Stage 1: Development Image 
+# Stage 1: Development Image
 # ==========================
 FROM node:${NODE_VERSION} as development
 
@@ -123,9 +123,9 @@ COPY . .
 # -----------------------------------
 RUN npm run build
 
-# ==========================
-# Stage 3: Production Image 
-# ==========================
+# =========================
+# Stage 3: Production Image
+# =========================
 FROM node:${NODE_VERSION} as production
 
 # -----------------
