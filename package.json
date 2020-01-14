@@ -1,8 +1,13 @@
 {
-  "name": "auth-service",
+  "name": "bookmarks-backend",
+  "author": "Charlie Crouse <charlietcrouse@icloud.com>",
+  "description": "API to manage bookmarks",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:charliecrouse/bookmarks-backend.git"
+  },
   "version": "1.0.0",
   "main": "src/index.ts",
-  "author": "Charlie Crouse <charlietcrouse@icloud.com>",
   "license": "MIT",
   "scripts": {
     "build": "tsc && babel --verbose ./dist --out-dir ./build",
@@ -10,7 +15,7 @@
     "dev": "nodemon",
     "lint": "eslint --fix --ext js,ts .",
     "start": "node ./build/index.js",
-    "prebuild": "yarn clean"
+    "prebuild": "npm run clean"
   },
   "dependencies": {
     "@babel/polyfill": "^7.7.0",
