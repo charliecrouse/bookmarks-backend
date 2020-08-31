@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # REST API to manage bookmarks
 
 # API Usage
