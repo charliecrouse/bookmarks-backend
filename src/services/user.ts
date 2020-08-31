@@ -1,25 +1,26 @@
 import * as validator from 'validator';
 
-import * as crypto from '../utils/crypto';
-import * as errors from '../utils/errors';
+import * as crypto from '../shared/crypto';
+import * as e from '../shared/errors';
+import { User } from '../models/user';
+import { findTokenByJWT } from './token';
 
-import * as tokenService from './token';
-import { User, UserShape } from '../models/user';
+interface CreateUserProps {
+  email: string;
+  password: string;
+}
 
-export const createUser = async ({ email, password }: UserShape): Promise<User> => {
+export async function createUser({ email, password }: CreateUserProps): Promise<User> {
   const existing = await User.findByPk(email);
 
   if (existing) {
-    const error = new errors.ClientError(
-      `A user already exists with the given email, ${email}`,
-      400,
-    );
-    return Promise.reject(error);
+    const message = `A user with the given email, "${email}", already exists!`;
+    return Promise.reject(new e.ClientError(message));
   }
 
   if (!validator.isEmail(email)) {
-    const error = new errors.ClientError(`The given email is invalid, ${email}!`, 400);
-    return Promise.reject(error);
+    const message = `The given email, "${email}", is invalid!`;
+    return Promise.reject(new e.ClientError(message));
   }
 
   const user = new User({
@@ -28,36 +29,33 @@ export const createUser = async ({ email, password }: UserShape): Promise<User> 
   });
 
   return await user.save();
-};
+}
 
-export const findUserByEmail = async (email: string): Promise<User> => {
+export async function findUserByEmail(email: string): Promise<User> {
   const user = await User.findByPk(email);
 
   if (!user) {
-    const error = new errors.ClientError(`No user exists with the given email, ${email}!`, 400);
-    return Promise.reject(error);
+    const message = `Failed to find user with the given email, "${email}"!`;
+    return Promise.reject(new e.ClientError(message));
   }
 
   return user;
-};
+}
 
-export const findUserByCredentials = async (email: string, password: string): Promise<User> => {
+export async function findUserByCredentials(email: string, password: string): Promise<User> {
   const user = await findUserByEmail(email);
+
   const hasValidCredentials = await crypto.verify(user.password, password);
 
   if (!hasValidCredentials) {
-    const error = new errors.ClientError(
-      `Invalid credentials for the given email, ${email}!`,
-      400,
-    );
-    return Promise.reject(error);
+    const message = `Incorrect password for the given email, "${email}"!`;
+    return Promise.reject(new e.ClientError(message));
   }
 
   return user;
-};
+}
 
-export const findUserByJWT = async (jwt: string): Promise<User> => {
-  const token = await tokenService.findTokenByJWT(jwt);
-  const user = await findUserByEmail(token.ownerEmail);
-  return user;
-};
+export async function findUserByJWT(jwt: string): Promise<User> {
+  const token = await findTokenByJWT(jwt);
+  return await findUserByEmail(token.ownerEmail);
+}

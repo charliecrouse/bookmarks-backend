@@ -1,136 +1,154 @@
 import * as validator from 'validator';
 
-import * as userService from '../services/user';
-import * as errors from '../utils/errors';
-
+import * as e from '../shared/errors';
+import { findUserByEmail } from './user';
 import { Bookmark, BookmarkShape } from '../models/bookmark';
 
-export const findBookmarkById = async (id: number): Promise<Bookmark> => {
+export async function findBookmarkById(id: number): Promise<Bookmark> {
   const bookmark = await Bookmark.findByPk(id);
 
   if (!bookmark) {
-    const error = new errors.ClientError(`No bookmark exists with the given id, ${id}!`, 400);
-    return Promise.reject(error);
+    const message = `Failed to find Bookmark with id ${id}!`;
+    return Promise.reject(new e.ClientError(message));
   }
 
   return bookmark;
-};
+}
 
-export const findOwnedBookmarks = async (ownerEmail: string): Promise<Bookmark[]> => {
-  const owner = await userService.findUserByEmail(ownerEmail);
+export async function findOwnedBookmarks(ownerEmail: string): Promise<Bookmark[]> {
+  const owner = await findUserByEmail(ownerEmail);
 
   const bookmarks = await Bookmark.findAll({
+    where: { ownerEmail: owner.email },
+  });
+
+  return bookmarks;
+}
+
+export async function findOwnedBookmark(ownerEmail: string, id: number): Promise<Bookmark> {
+  const owner = await findUserByEmail(ownerEmail);
+
+  const bookmark = await Bookmark.findOne({
     where: {
+      id,
       ownerEmail: owner.email,
     },
   });
 
-  return bookmarks;
-};
-
-export const findOwnedBookmark = async (id: number, ownerEmail: string): Promise<Bookmark> => {
-  const user = await userService.findUserByEmail(ownerEmail);
-  const bookmark = await findBookmarkById(id);
-
-  if (bookmark.ownerEmail !== user.email) {
-    const error = new errors.ClientError(`You have no bookmarks with id, ${id}!`, 400);
-    return Promise.reject(error);
+  if (!bookmark) {
+    const message = `Failed to find Bookmark with id ${id}!`;
+    return Promise.reject(new e.ClientError(message));
   }
 
   return bookmark;
-};
+}
 
-export const createOwnedBookmark = async (
-  ownerEmail: string,
-  parent: number | null,
-  props: BookmarkShape,
-): Promise<Bookmark> => {
-  const user = await userService.findUserByEmail(ownerEmail);
+interface CreateOwnedBookmarkProps extends BookmarkShape {
+  ownerEmail: string;
+  parentId: number | null;
+}
 
-  if (parent) {
-    const parentBookmark = await findOwnedBookmark(parent, user.email);
+export async function createOwnedBookmark(props: CreateOwnedBookmarkProps): Promise<Bookmark> {
+  const { ownerEmail, parentId, url } = props;
 
-    if (!parentBookmark.isFolder) {
-      const error = new errors.ClientError(
-        `The bookmark with the given id, ${parent}, is not a folder!`,
-        400,
-      );
-      return Promise.reject(error);
+  const owner = await findUserByEmail(ownerEmail);
+
+  if (parentId != null) {
+    // Parent Bookmark must exist
+    const parent = await findOwnedBookmark(owner.email, parentId);
+
+    // Parent Bookmark must be a folder
+    if (!parent.isFolder) {
+      const message = `The given parentId, ${parentId}, is not a folder!`;
+      return Promise.reject(new e.ClientError(message));
     }
   }
 
-  if (props.url && !validator.isURL(props.url)) {
-    const error = new errors.ClientError(`The given URL, ${props.url}, is invalid!`, 400);
-    return Promise.reject(error);
+  // URL must be valid
+  if (url && !validator.isURL(url)) {
+    const message = `The given URL, "${url}", is not recognized as a valid URL!`;
+    return Promise.reject(new e.ClientError(message));
   }
 
-  const bookmark = new Bookmark({
-    ...props,
-    parent,
-    ownerEmail: user.email,
-  });
-
+  const bookmark = new Bookmark(props);
   return await bookmark.save();
-};
+}
 
-export const updateOwnedBookmark = async (
+interface UpdateOwnedBookmarkProps {
+  name?: string;
+  url?: string;
+  parentId?: number;
+}
+
+interface UpdateOwnedBookmarkResponse {
+  bookmark: Bookmark;
+  issues: string[];
+}
+
+export async function updateOwnedBookmark(
+  ownerEmail: string,
   id: number,
-  ownerEmail: string,
-  props: Partial<Bookmark>,
-): Promise<Bookmark> => {
-  const bookmark = await findOwnedBookmark(id, ownerEmail);
+  updates: UpdateOwnedBookmarkProps,
+): Promise<UpdateOwnedBookmarkResponse> {
+  const { name, url, parentId } = updates;
+  const bookmark = await findOwnedBookmark(ownerEmail, id);
 
-  if (props.url && bookmark.isFolder) {
-    const error = new errors.ClientError(`Cannot add url to folder bookmark!`, 400);
-    return Promise.reject(error);
+  const issues: string[] = [];
+
+  if (name) {
+    bookmark.name = name;
   }
 
-  if (props.name) {
-    bookmark.name = props.name;
-  }
-
-  if (bookmark.isBookmark && props.url) {
-    if (!validator.isURL(props.url)) {
-      const error = new errors.ClientError(`The given URL, ${props.url}, is invalid!`, 400);
-      return Promise.reject(error);
-    }
-    bookmark.url = props.url;
-  }
-
-  if (props.parent) {
-    const parentBookmark = await findOwnedBookmark(props.parent, ownerEmail);
-
-    if (!parentBookmark.isFolder) {
-      const error = new errors.ClientError(
-        `The bookmark with the given id, ${props.parent}, is not a folder!`,
-        400,
-      );
-      return Promise.reject(error);
+  if (url) {
+    if (bookmark.isFolder) {
+      issues.push(`Cannot update the URL for ${id} because it is a folder!`);
+    } else if (!validator.isURL(url)) {
+      issues.push(`The given URL, "${url}" is invalid!`);
+    } else {
+      bookmark.url = url;
     }
   }
 
-  return await bookmark.save();
-};
+  if (parentId != null) {
+    const parent = await findOwnedBookmark(ownerEmail, parentId);
 
-// If the given bookmark is a folder, this function will recursively delete all children bookmarks
-// and sub-folders.
-export const deleteOwnedBookmark = async (id: number, ownerEmail: string): Promise<void> => {
-  const bookmark = await findOwnedBookmark(id, ownerEmail);
+    if (!parent.isFolder) {
+      issues.push(`The given parentId, ${parentId}, is not a Folder!`);
+    } else if (parentId === bookmark.id) {
+      issues.push(`Cannot make a Bookmark it's own Parent!`);
+    } else if (await parent.isChildOf(bookmark.id)) {
+      issues.push(`Cannot make a Bookmark a child of one of it's children!`);
+    } else {
+      bookmark.parent = parentId;
+    }
+  }
+
+  return {
+    bookmark: await bookmark.save(),
+    issues,
+  };
+}
+
+export async function deleteOwnedBookmark(ownerEmail: string, id: number): Promise<void> {
+  const bookmark = await findOwnedBookmark(ownerEmail, id);
 
   if (bookmark.isBookmark) {
     return await bookmark.destroy();
   }
 
-  // Delete all children of the current bookmark, if it is a folder
   const children = await Bookmark.findAll({
+    attributes: ['id'],
+    raw: true,
     where: {
+      ownerEmail,
       parent: bookmark.id,
-      ownerEmail: ownerEmail,
     },
   });
 
-  const promises = children.map(child => deleteOwnedBookmark(child.id, ownerEmail));
-  await Promise.all(promises);
+  const recursivelyDeleteAllChildren = children.map(child => {
+    return deleteOwnedBookmark(ownerEmail, child.id);
+  });
 
-  return await bookmark.destroy();
-};
+  await Promise.all(recursivelyDeleteAllChildren);
+  await Bookmark.destroy();
+}

@@ -1,25 +1,11 @@
-version: "3"
+version: '3'
 services:
-  backend:
+  bookmarks-api:
     build: .
-    ports:
-      - "${PORT}:3000"
-    links:
-      - postgres
-    environment:
-      - JWT_SECRET=secret
-      - NODE_ENV=${NODE_ENV}
-    depends_on:
-      - postgres
-    container_name: bookmarks-backend
-  postgres:
-    image: postgres:alpine
     restart: always
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - NODE_ENV=$NODE_ENV
+      - DATABASE_URI=$DATABASE_URI
+      - JWT_SECRET=$JWT_SECRET
     ports:
-      - "5432:5432"
-    container_name: bookmarks-postgres
-volumes:
-  postgres-data:
-    external: true
+      - $PORTS:8000

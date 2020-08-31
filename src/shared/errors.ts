@@ -15,7 +15,7 @@ export class InternalError extends CustomError {
 export class ClientError extends CustomError {
   statusCode: number;
 
-  constructor(message: string, statusCode: number) {
+  constructor(message: string, statusCode = 400) {
     super(message);
     this.statusCode = statusCode;
   }

@@ -1,23 +1,19 @@
-import '@babel/polyfill';
-import 'reflect-metadata';
+import { connectToDatabase } from './database';
+import { createApp } from './server';
 
-import { createApp, getPort } from './third-party/express';
-import { createDatabaseConnection } from './third-party/sequelize';
+async function main(): Promise<void> {
+  await connectToDatabase();
 
-const main = async () => {
-  // Connect to database
-  const database = createDatabaseConnection();
-  await database.sync();
-  console.log('Successfully connected to database');
-
-  // Start express server
   const app = createApp();
-  const port = getPort();
+  const port: number = app.get('PORT');
 
   await app.listen(port);
-  console.log(`Express server is listening at http://localhost:${port}`);
-};
+  console.log(`Application is listening at http://localhost:${port}`);
+}
 
 if (!module.parent) {
-  main();
+  main().catch(function(err) {
+    console.error(err.toString());
+    return process.exit();
+  });
 }

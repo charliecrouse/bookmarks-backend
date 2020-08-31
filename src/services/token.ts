@@ -1,42 +1,36 @@
 import * as jwt from 'jsonwebtoken';
-
 import addMinutes from 'date-fns/addMinutes';
 
-import * as userService from '../services/user';
-import * as errors from '../utils/errors';
-
+import * as e from '../shared/errors';
 import { Token } from '../models/token';
+import { findUserByEmail } from './user';
 
-export const createToken = async (ownerEmail: string, role = 'user'): Promise<Token> => {
-  await userService.findUserByEmail(ownerEmail);
+export async function createToken(ownerEmail: string, role = 'user'): Promise<Token> {
+  // Verify that the email belongs to a valid user
+  await findUserByEmail(ownerEmail);
 
   const secret = Token.getSecret();
-  const expires = addMinutes(new Date(), 30);
+  const expires: Date = addMinutes(new Date(), 30);
 
   const token = new Token({
     jwt: jwt.sign({ role, expires }, secret),
     ownerEmail,
   });
-
   return await token.save();
-};
+}
 
-export const findTokenByJWT = async (jwt: string): Promise<Token> => {
+export async function findTokenByJWT(jwt: string): Promise<Token> {
   const token = await Token.findByPk(jwt);
 
   if (!token) {
-    const error = new errors.ClientError(`No token exists with the given JWT, ${jwt}!`, 400);
-    return Promise.reject(error);
+    const message = `Failed to find a valid Token for the given JWT, "${jwt}"!`;
+    return Promise.reject(new e.ClientError(message));
   }
 
   if (token.isExpired) {
-    const error = new errors.ClientError(
-      `The given JWT, ${jwt}, has expired. Please re-authenticate!`,
-      400,
-    );
-    await token.destroy();
-    return Promise.reject(error);
+    const message = `The given JWT, "${jwt}" has expired. Please re-authenticate!`;
+    return Promise.reject(new e.ClientError(message));
   }
 
   return token;
-};
+}

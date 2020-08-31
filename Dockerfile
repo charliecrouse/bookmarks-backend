@@ -2,8 +2,8 @@
 # Global Aruments
 # ===============
 ARG APP_NAME=bookmarks-backend
-ARG APP_PORT=3000
-ARG NODE_VERSION=12.13-alpine
+ARG APP_PORT=8000
+ARG NODE_VERSION=erbium-alpine
 
 # ================
 # STAGE 0: Install
@@ -32,10 +32,10 @@ RUN apk add --no-cache build-base python; \
 WORKDIR ${APP_DIR}
 
 # Copy base npm files
-COPY package.json package-lock.json ./
+COPY package.json yarn.lock ./
 
 # Install dependencies
-RUN npm install
+RUN yarn install
 
 # ==========================
 # Stage 1: Development Image
@@ -47,14 +47,12 @@ FROM node:${NODE_VERSION} as development
 # -----------------
 ARG APP_NAME
 ARG APP_PORT
-ARG DOCKER=true
 ARG NODE_ENV=development
 
 # -----------------------------
 # Stage 1 Environment Variables
 # -----------------------------
 ENV APP_DIR=/${APP_NAME}
-ENV DOCKER=true
 ENV NODE_ENV=${NODE_ENV}
 ENV PORT=${APP_PORT}
 
@@ -84,7 +82,7 @@ HEALTHCHECK --interval=5m --timeout=3s \
 # ---------------------------------
 # Stage 1, Layer 3: Run application
 # ---------------------------------
-CMD [ "npm", "run", "dev" ]
+CMD [ "yarn", "dev" ]
 
 # ==========================
 # Stage 2: Build Application
@@ -121,7 +119,7 @@ COPY . .
 # -----------------------------------
 # Stage 2, Layer 2: Application build
 # -----------------------------------
-RUN npm run build
+RUN yarn build
 
 # =========================
 # Stage 3: Production Image
@@ -133,14 +131,12 @@ FROM node:${NODE_VERSION} as production
 # -----------------
 ARG APP_NAME
 ARG APP_PORT
-ARG DOCKER=true
 ARG NODE_ENV=development
 
 # -----------------------------
 # Stage 3 Environment Variables
 # -----------------------------
 ENV APP_DIR=/${APP_NAME}
-ENV DOCKER=true
 ENV NODE_ENV=production
 ENV PORT=${APP_PORT}
 
@@ -169,7 +165,7 @@ COPY --from=build ${APP_DIR}/build ./build
 # -----------------------------------
 # Stage 3, Layer 3: Application prune
 # -----------------------------------
-RUN npm prune --production
+RUN yarn install --production
 
 # ------------------------------
 # Stage 3, Layer 4: Health check
@@ -181,4 +177,4 @@ HEALTHCHECK --interval=5m --timeout=3s \
 # Stage 3, Layer 5: Run application
 # ---------------------------------
 EXPOSE ${PORT}
-CMD [ "npm", "run", "start" ]
+CMD [ "yarn", "start" ]

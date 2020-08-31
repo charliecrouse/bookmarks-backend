@@ -40,4 +40,24 @@ export class Bookmark extends Model<Bookmark> implements BookmarkShape {
   get isFolder(): boolean {
     return !this.isBookmark;
   }
+
+  get isChild(): boolean {
+    return this.parent !== null;
+  }
+
+  /* Determine if the current Bookmark instance is a child of the Bookmark with the given id */
+  async isChildOf(targetId: number): Promise<boolean> {
+    return await this._isChildOf(targetId, this.parent);
+  }
+
+  async _isChildOf(targetId: number, parentId?: number): Promise<boolean> {
+    if (parentId == null) return false;
+
+    const parent = await Bookmark.findByPk(parentId);
+
+    if (!parent) return false;
+    if (parent.id === targetId) return true;
+
+    return await this._isChildOf(targetId, this.parent);
+  }
 }

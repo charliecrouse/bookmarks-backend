@@ -1,20 +1,22 @@
 {
-  "name": "auth-service",
+  "name": "bookamrks-api",
   "version": "1.0.0",
   "main": "src/index.ts",
   "author": "Charlie Crouse <charlietcrouse@icloud.com>",
   "license": "MIT",
   "scripts": {
+    "prebuild": "yarn clean",
     "build": "tsc && babel --verbose ./dist --out-dir ./build",
     "clean": "rimraf ./build ./dist",
     "dev": "nodemon",
     "lint": "eslint --fix --ext js,ts .",
-    "start": "node ./build/index.js",
-    "prebuild": "yarn clean"
+    "prestart": "yarn build",
+    "start": "node ./build/index.js"
   },
   "dependencies": {
     "@babel/polyfill": "^7.7.0",
     "argon2": "^0.25.1",
+    "async": "^3.2.0",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
@@ -33,6 +35,7 @@
     "@babel/cli": "^7.7.0",
     "@babel/core": "^7.7.2",
     "@babel/preset-env": "^7.7.1",
+    "@types/async": "^3.2.3",
     "@types/bluebird": "^3.5.29",
     "@types/compression": "^1.0.1",
     "@types/config": "^0.0.36",
