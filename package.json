@@ -1,8 +1,13 @@
 {
-  "name": "bookamrks-api",
+  "name": "bookmarks-api",
+  "author": "Charlie Crouse <charlietcrouse@icloud.com>",
+  "description": "API to manage bookmarks",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:charliecrouse/bookmarks-backend.git"
+  },
   "version": "1.0.0",
   "main": "src/index.ts",
-  "author": "Charlie Crouse <charlietcrouse@icloud.com>",
   "license": "MIT",
   "scripts": {
     "prebuild": "yarn clean",
