@@ -137,8 +137,6 @@ export async function deleteOwnedBookmark(ownerEmail: string, id: number): Promi
   }
 
   const children = await Bookmark.findAll({
-    attributes: ['id'],
-    raw: true,
     where: {
       ownerEmail,
       parent: bookmark.id,
@@ -150,5 +148,5 @@ export async function deleteOwnedBookmark(ownerEmail: string, id: number): Promi
   });
 
   await Promise.all(recursivelyDeleteAllChildren);
-  await Bookmark.destroy();
+  await bookmark.destroy();
 }
