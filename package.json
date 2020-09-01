@@ -15,7 +15,6 @@
     "clean": "rimraf ./build ./dist",
     "dev": "nodemon",
     "lint": "eslint --fix --ext js,ts .",
-    "prestart": "yarn build",
     "start": "node ./build/index.js"
   },
   "dependencies": {
