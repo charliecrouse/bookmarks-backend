@@ -1,14 +1,16 @@
+import { Optional } from 'sequelize';
 import { Model, Table, Column, ForeignKey, HasMany } from 'sequelize-typescript';
 
 import { User } from './user';
 
 export interface BookmarkShape {
   name: string;
-  url: string | null;
+  url: string;
 }
 
 @Table({ timestamps: true })
-export class Bookmark extends Model<Bookmark> implements BookmarkShape {
+export class Bookmark extends Model<Bookmark, Optional<BookmarkShape, 'url'>>
+  implements BookmarkShape {
   // --------------------------------------------
   // COLUMNS
   // --------------------------------------------

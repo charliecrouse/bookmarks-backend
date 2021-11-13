@@ -1,153 +1,101 @@
 # ===============
-# Global Aruments
+# Global
 # ===============
-ARG APP_NAME=bookmarks-backend
+
+# ------------------
+# Global Environment
+# ------------------
+ENV APP_NAME=bookmarks-backend
+ENV NODE_VERSION=gallium-alpine
+ENV APP_DIR=/${APP_NAME}
+ENV YARN_DIR=${APP_DIR}/.yarn
+
+# ----------------
+# Global Arguments
+# ----------------
 ARG APP_PORT=8000
-ARG NODE_VERSION=erbium-alpine
 
 # ================
-# STAGE 0: Install
+# Stage: Install
 # ================
 FROM node:${NODE_VERSION} as install
 
-# -----------------
-# Stage 0 Arguments
-# -----------------
-ARG APP_NAME
-
-# -----------------------------
-# Stage 0 Environment Variables
-# -----------------------------
-ENV APP_DIR=/${APP_NAME}
-
 # --------------------------------------------------------------
-# Stage 0, Layer 0: OS config and system dependency installation
+# [Install] Layer 0: OS config and system dependency installation
 # --------------------------------------------------------------
 RUN apk add --no-cache build-base python; \
   mkdir -p ${APP_DIR}
 
 # ------------------------------------------------------------------
-# Stage 0, Layer 1: Application node modules dependency installation
+# [Install] Layer 1: Application node modules dependency installation
 # ------------------------------------------------------------------
 WORKDIR ${APP_DIR}
 
 # Copy base npm files
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock .yarn/patches .yarn/plugins .yarn/releases .yarn/sdks .yarn/versions  ./
 
 # Install dependencies
 RUN yarn install
 
 # ==========================
-# Stage 1: Development Image
-# ==========================
-FROM node:${NODE_VERSION} as development
-
-# -----------------
-# Stage 1 Arguments
-# -----------------
-ARG APP_NAME
-ARG APP_PORT
-ARG NODE_ENV=development
-
-# -----------------------------
-# Stage 1 Environment Variables
-# -----------------------------
-ENV APP_DIR=/${APP_NAME}
-ENV NODE_ENV=${NODE_ENV}
-ENV PORT=${APP_PORT}
-
-# --------------------------------------------------------------
-# Stage 1, Layer 0: OS config and system dependency installation
-# --------------------------------------------------------------
-RUN apk add --no-cache build-base python; \
-  mkdir -p ${APP_DIR}
-
-# ------------------------------------------
-# Stage 1, Layer 1: Application installation
-# ------------------------------------------
-WORKDIR ${APP_DIR}
-
-# Get installed node_modules from installation stage
-COPY --from=install ${APP_DIR}/node_modules ./node_modules
-
-# Get application source
-COPY . .
-
-# ------------------------------
-# Stage 1, Layer 2: Health check
-# ------------------------------
-HEALTHCHECK --interval=5m --timeout=3s \
-  CMD curl -f http://localhost:${PORT}/healthcheck || exit 1
-
-# ---------------------------------
-# Stage 1, Layer 3: Run application
-# ---------------------------------
-CMD [ "yarn", "dev" ]
-
-# ==========================
-# Stage 2: Build Application
+# Stage: Build
 # ==========================
 FROM node:${NODE_VERSION} as build
 
-# -----------------
-# Stage 2 Arguments
-# -----------------
-ARG APP_NAME
-
-# -----------------------------
-# Stage 2 Environment Variables
-# -----------------------------
-ENV APP_DIR=/${APP_NAME}
-
 # --------------------------------------------------------------
-# Stage 2, Layer 0: OS config and system dependency installation
+# [Build] Layer 0: OS config and system dependency installation
 # --------------------------------------------------------------
 RUN apk add --no-cache build-base python; \
-  mkdir -p ${APP_DIR}
+  mkdir -p ${APP_DIR}; \
+  mkdir -p ${YARN_DIR}
 
 # ------------------------------------------
-# Stage 2, Layer 1: Application installation
+# [Build] Layer 1: Application installation
 # ------------------------------------------
 WORKDIR ${APP_DIR}
 
-# Get installed node_modules from installation stage
-COPY --from=install ${APP_DIR}/node_modules ./node_modules
+# Copy base npm files
+COPY package.json yarn.lock ./
+
+# Move installation
+COPY --from=install ${APP_DIR}/.pnp* .
+COPY --from=install ${YARN_DIR} .
 
 # Get application source
 COPY . .
 
 # -----------------------------------
-# Stage 2, Layer 2: Application build
+# [Build], Layer 2: Application build
 # -----------------------------------
 RUN yarn build
 
 # =========================
-# Stage 3: Production Image
+# Stage: Image
 # =========================
 FROM node:${NODE_VERSION} as production
 
 # -----------------
-# Stage 3 Arguments
+# [Image] Arguments
 # -----------------
 ARG APP_NAME
 ARG APP_PORT
 ARG NODE_ENV=development
 
 # -----------------------------
-# Stage 3 Environment Variables
+# [Image] Environment Variables
 # -----------------------------
 ENV APP_DIR=/${APP_NAME}
 ENV NODE_ENV=production
 ENV PORT=${APP_PORT}
 
 # --------------------------------------------------------------
-# Stage 3, Layer 0: OS config and system dependency installation
+# [Image] Layer 0: OS config and system dependency installation
 # --------------------------------------------------------------
 RUN apk add --no-cache build-base python; \
   mkdir -p ${APP_DIR}
 
 # ------------------------------------------
-# Stage 3, Layer 1: Application installation
+# [Image] Layer 1: Application installation
 # ------------------------------------------
 WORKDIR ${APP_DIR}
 
@@ -158,23 +106,23 @@ COPY --from=install ${APP_DIR}/node_modules ./node_modules
 COPY . .
 
 # -----------------------------------
-# Stage 3, Layer 2: Application build
+# [Image] Layer 2: Application build
 # -----------------------------------
 COPY --from=build ${APP_DIR}/build ./build
 
 # -----------------------------------
-# Stage 3, Layer 3: Application prune
+# [Image] Layer 3: Application prune
 # -----------------------------------
 RUN yarn install --production
 
 # ------------------------------
-# Stage 3, Layer 4: Health check
+# [Image] Layer 4: Health check
 # ------------------------------
 HEALTHCHECK --interval=5m --timeout=3s \
   CMD curl -f http://localhost:${PORT}/healthcheck || exit 1
 
 # ---------------------------------
-# Stage 3, Layer 5: Run application
+# [Image] Layer 5: Run application
 # ---------------------------------
 EXPOSE ${PORT}
 CMD [ "yarn", "start" ]
