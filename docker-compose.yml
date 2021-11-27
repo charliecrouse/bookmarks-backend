@@ -1,11 +1,17 @@
 version: '3'
+
 services:
-  bookmarks-api:
-    build: .
-    restart: always
+  bookmarks-backend:
     environment:
-      - NODE_ENV=$NODE_ENV
-      - DATABASE_URI=$DATABASE_URI
-      - JWT_SECRET=$JWT_SECRET
+      - NODE_ENV=development
+      - JWT_SECRET=secret
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: bookmarks-backend
+    volumes:
+      - ./:/home/node/bookmarks-backend
     ports:
-      - $PORTS:8000
+      - 5000:5000
+      - 9229:9229
+    command: /bin/sh -c 'yarn install && yarn run debug'

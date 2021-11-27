@@ -1,0 +1,12 @@
+{
+  "script": "./src/index.ts",
+  "ext": "ts json",
+  "ignore": [
+    "node_modules/",
+    "build/",
+    "dist/"
+  ],
+  "legacyWatch": true,
+  "delay": 200,
+  "verbose": true
+}

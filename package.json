@@ -13,7 +13,7 @@
     "prebuild": "yarn clean",
     "build": "tsc && babel --verbose ./dist --out-dir ./build",
     "clean": "rimraf ./build ./dist",
-    "dev": "nodemon",
+    "dev": "nodemon --trace-warnings --inspect=0.0.0.0:9229 ./build/index.js",
     "lint": "eslint --fix --ext js,ts .",
     "start": "yarn node ./build/index.js",
     "postinstall": "husky install",
@@ -55,7 +55,6 @@
     "@types/validator": "^10.11.3",
     "@typescript-eslint/eslint-plugin": "^2.7.0",
     "@typescript-eslint/parser": "^2.7.0",
-    "@yarnpkg/sdks": "^2.5.1-rc.1",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-prettier": "^3.1.1",
@@ -69,7 +68,6 @@
     "ts-node": "^8.5.2",
     "typescript": "^3.7.2"
   },
-  "packageManager": "yarn@3.1.0",
   "lint-staged": {
     "*.{js,ts}": "eslint --cache --fix"
   }

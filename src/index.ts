@@ -8,7 +8,7 @@ async function main(): Promise<void> {
   const port: number = app.get('PORT');
 
   await app.listen(port);
-  console.log(`Application is listening at http://localhost:${port}`);
+  console.log(`Application is up at http://localhost:${port}`);
 }
 
 if (!module.parent) {

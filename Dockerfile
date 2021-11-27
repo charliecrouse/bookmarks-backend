@@ -1,128 +1,111 @@
-# ===============
-# Global
-# ===============
+# --------------------
+# Global Configuration
+# --------------------
+ARG APP_NAME=bookmarks-backend
+ARG APP_HOME=/home/node/${APP_NAME}
+ARG APP_USER=node
+ARG APP_PORT=5000
+ARG NODE_VERSION=lts-alpine
 
-# ------------------
-# Global Environment
-# ------------------
-ENV APP_NAME=bookmarks-backend
-ENV NODE_VERSION=gallium-alpine
-ENV APP_DIR=/${APP_NAME}
-ENV YARN_DIR=${APP_DIR}/.yarn
-
-# ----------------
-# Global Arguments
-# ----------------
-ARG APP_PORT=8000
-
-# ================
+# ==============
 # Stage: Install
-# ================
+# ==============
 FROM node:${NODE_VERSION} as install
 
-# --------------------------------------------------------------
-# [Install] Layer 0: OS config and system dependency installation
-# --------------------------------------------------------------
-RUN apk add --no-cache build-base python; \
-  mkdir -p ${APP_DIR}
+ARG APP_NAME
+ARG APP_HOME
+ARG APP_USER
+ARG APP_PORT
+ARG NODE_VERSION
 
-# ------------------------------------------------------------------
-# [Install] Layer 1: Application node modules dependency installation
-# ------------------------------------------------------------------
-WORKDIR ${APP_DIR}
+# Install and configure system dependencies
+RUN apk add --no-cache build-base python3; \
+  mkdir -p ${APP_HOME}; \
+  chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
-# Copy base npm files
-COPY package.json yarn.lock .yarn/patches .yarn/plugins .yarn/releases .yarn/sdks .yarn/versions  ./
+# Set the working directory
+WORKDIR ${APP_HOME}
+
+# Set the active user
+USER ${APP_USER}
+
+# Copy base NPM files
+COPY --chown=${APP_USER}:${APP_USER} package.json yarn.lock ./
 
 # Install dependencies
-RUN yarn install
+RUN yarn cache clean --force && yarn install
 
-# ==========================
+# ============
 # Stage: Build
-# ==========================
+# ============
 FROM node:${NODE_VERSION} as build
 
-# --------------------------------------------------------------
-# [Build] Layer 0: OS config and system dependency installation
-# --------------------------------------------------------------
-RUN apk add --no-cache build-base python; \
-  mkdir -p ${APP_DIR}; \
-  mkdir -p ${YARN_DIR}
+ARG APP_NAME
+ARG APP_HOME
+ARG APP_USER
+ARG APP_PORT
+ARG NODE_VERSION
 
-# ------------------------------------------
-# [Build] Layer 1: Application installation
-# ------------------------------------------
-WORKDIR ${APP_DIR}
+# Install and configure system dependencies
+RUN apk add --no-cache build-base python3; \
+  mkdir -p ${APP_HOME}; \
+  chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
-# Copy base npm files
-COPY package.json yarn.lock ./
+# Set the working directory
+WORKDIR ${APP_HOME}
 
-# Move installation
-COPY --from=install ${APP_DIR}/.pnp* .
-COPY --from=install ${YARN_DIR} .
+# Set the active user
+USER ${APP_USER}
 
-# Get application source
-COPY . .
+# Copy base NPM files
+COPY --chown=${APP_USER}:${APP_USER} package.json yarn.lock ./
 
-# -----------------------------------
-# [Build], Layer 2: Application build
-# -----------------------------------
+# Copy application dependencies from the "install" stage
+COPY --chown=${APP_USER}:${APP_USER} --from=install ${APP_HOME}/node_modules ./node_modules
+
+# Copy application source
+COPY --chown=${APP_USER}:${APP_USER} . .
+
+# Build the application
 RUN yarn build
 
-# =========================
+# ============
 # Stage: Image
-# =========================
+# ============
 FROM node:${NODE_VERSION} as production
 
-# -----------------
-# [Image] Arguments
-# -----------------
 ARG APP_NAME
+ARG APP_HOME
+ARG APP_USER
 ARG APP_PORT
-ARG NODE_ENV=development
+ARG NODE_VERSION
 
-# -----------------------------
-# [Image] Environment Variables
-# -----------------------------
-ENV APP_DIR=/${APP_NAME}
-ENV NODE_ENV=production
-ENV PORT=${APP_PORT}
+# Install and configure system dependencies
+RUN apk add --no-cache build-base python3; \
+  mkdir -p ${APP_HOME}; \
+  chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
-# --------------------------------------------------------------
-# [Image] Layer 0: OS config and system dependency installation
-# --------------------------------------------------------------
-RUN apk add --no-cache build-base python; \
-  mkdir -p ${APP_DIR}
+# Set the working directory
+WORKDIR ${APP_HOME}
 
-# ------------------------------------------
-# [Image] Layer 1: Application installation
-# ------------------------------------------
-WORKDIR ${APP_DIR}
+# Set the active user
+USER ${APP_USER}
 
-# Get installed node_modules from installation stage
-COPY --from=install ${APP_DIR}/node_modules ./node_modules
+# Copy base NPM files
+COPY --chown=${APP_USER}:${APP_USER} package.json yarn.lock ./
 
-# Get application source
-COPY . .
+# Copy application dependencies from the "install" stage
+COPY --chown=${APP_USER}:${APP_USER} --from=install ${APP_HOME}/node_modules ./node_modules
 
-# -----------------------------------
-# [Image] Layer 2: Application build
-# -----------------------------------
-COPY --from=build ${APP_DIR}/build ./build
+# Copy application build from "build" stage
+COPY --chown=${APP_USER}:${APP_USER} --from=build ${APP_HOME}/build ./build
 
-# -----------------------------------
-# [Image] Layer 3: Application prune
-# -----------------------------------
-RUN yarn install --production
+# Expose application port
+EXPOSE ${APP_PORT}
 
-# ------------------------------
-# [Image] Layer 4: Health check
-# ------------------------------
+# Configure healthcheck
 HEALTHCHECK --interval=5m --timeout=3s \
   CMD curl -f http://localhost:${PORT}/healthcheck || exit 1
 
-# ---------------------------------
-# [Image] Layer 5: Run application
-# ---------------------------------
-EXPOSE ${PORT}
-CMD [ "yarn", "start" ]
+# Run application
+CMD [ "node", "build/index.js" ]
