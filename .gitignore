@@ -114,3 +114,9 @@ config/production.yml
 
 # Editor Configs
 .vscode/
+
+# NPM credentials
+.npmrc
+
+# Docker Volumes
+core

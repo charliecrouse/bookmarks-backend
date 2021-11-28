@@ -1,11 +1,41 @@
-version: '3'
+version: "3.3"
+
 services:
-  bookmarks-api:
-    build: .
+  bookmarks-backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: /bin/sh -c 'yarn install && yarn run dev'
+    container_name: bookmarks-backend
+    environment:
+      - NODE_ENV=development
+    ports:
+      - 5000:5000
+      - 9229:9229
+    networks:
+      - bookmarks-net
+    volumes:
+      - type: bind
+        source: ./
+        target: /home/node/bookmarks-backend
+  postgres:
+    image: postgres:latest
     restart: always
     environment:
-      - NODE_ENV=$NODE_ENV
-      - DATABASE_URI=$DATABASE_URI
-      - JWT_SECRET=$JWT_SECRET
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=bookmarks-backend-development
     ports:
-      - $PORTS:8000
+      - 5432:5432
+    networks:
+      - bookmarks-net
+    volumes:
+      - type: volume
+        source: bookmarks-backend-postgres-vol
+        target: /var/lib/postgresql/data
+
+networks:
+  bookmarks-net:
+
+volumes:
+  bookmarks-backend-postgres-vol:

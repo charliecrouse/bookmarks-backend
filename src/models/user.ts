@@ -9,7 +9,7 @@ export interface UserShape {
 }
 
 @Table({ timestamps: true })
-export class User extends Model<User> implements UserShape {
+export class User extends Model<User, UserShape> implements UserShape {
   // --------------------------------------------
   // COLUMNS
   // --------------------------------------------

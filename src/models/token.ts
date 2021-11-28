@@ -15,7 +15,7 @@ export interface JWTShape {
 }
 
 @Table({ timestamps: false })
-export class Token extends Model<Token> implements TokenShape {
+export class Token extends Model<Token, TokenShape> implements TokenShape {
   @Column({ primaryKey: true })
   jwt!: string;
 

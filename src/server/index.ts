@@ -8,8 +8,7 @@ import { errorMiddleware } from './middleware';
 import { router } from '../api';
 
 function _configureApplication(app: Application): void {
-  const port: number = +(process.env.PORT || 8000);
-  app.set('PORT', port);
+  app.set('PORT', 5000);
 }
 
 function _registerMiddleware(app: Application): void {
