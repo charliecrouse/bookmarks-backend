@@ -100,6 +100,9 @@ COPY --chown=${APP_USER}:${APP_USER} --from=install ${APP_HOME}/node_modules ./n
 # Copy application build from "build" stage
 COPY --chown=${APP_USER}:${APP_USER} --from=build ${APP_HOME}/build ./build
 
+# Copy application source
+COPY --chown=${APP_USER}:${APP_USER} . .
+
 # Expose application port
 EXPOSE ${APP_PORT}
 

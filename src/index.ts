@@ -11,9 +11,7 @@ async function main(): Promise<void> {
   console.log(`Application is up at http://localhost:${port}`);
 }
 
-if (!module.parent) {
-  main().catch(function(err) {
-    console.error(err.toString());
-    return process.exit();
-  });
-}
+main().catch(err => {
+  console.error(err);
+  return process.exit();
+});

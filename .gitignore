@@ -117,3 +117,6 @@ config/production.yml
 
 # NPM credentials
 .npmrc
+
+# Docker Volumes
+core

@@ -13,7 +13,7 @@
     "prebuild": "yarn clean",
     "build": "tsc && babel --verbose ./dist --out-dir ./build",
     "clean": "rimraf ./build ./dist",
-    "dev": "nodemon --trace-warnings --inspect=0.0.0.0:9229 ./build/index.js",
+    "dev": "ts-node-dev --respawn --debug --trace-warnings --inspect=0.0.0.0:9229 ./src/index.ts",
     "lint": "eslint --fix --ext js,ts .",
     "start": "yarn node ./build/index.js",
     "postinstall": "husky install",
@@ -66,6 +66,7 @@
     "prettier": "^1.19.1",
     "rimraf": "^3.0.0",
     "ts-node": "^8.5.2",
+    "ts-node-dev": "^1.1.8",
     "typescript": "^3.7.2"
   },
   "lint-staged": {
