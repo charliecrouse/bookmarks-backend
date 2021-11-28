@@ -70,7 +70,6 @@ export async function createOwnedBookmark(props: CreateOwnedBookmarkProps): Prom
     return Promise.reject(new e.ClientError(message));
   }
 
-  // const bookmark = new Bookmark(props);
   const bookmark = new Bookmark(props);
   return await bookmark.save();
 }
