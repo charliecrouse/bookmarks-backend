@@ -9,4 +9,13 @@ module.exports = {
     ecmaVersion: 'ESNext', // Allows for the parsing of modern ECMAScript features
     sourceType: 'module', // Allows for the use of imports
   },
+  ignorePatterns: [
+    '.git',
+    '.vscode',
+    '_templates',
+    'node_modules/',
+    // build artifacts
+    'dist/',
+    'build/',
+  ],
 };

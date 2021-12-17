@@ -2,9 +2,8 @@
 # Global Configuration
 # --------------------
 ARG APP_NAME=bookmarks-backend
-ARG APP_HOME=/home/node/${APP_NAME}
 ARG APP_USER=node
-ARG APP_PORT=5000
+ARG APP_HOME=/home/${APP_USER}/${APP_NAME}
 ARG NODE_VERSION=lts-alpine
 
 # ==============
@@ -15,11 +14,10 @@ FROM node:${NODE_VERSION} as install
 ARG APP_NAME
 ARG APP_HOME
 ARG APP_USER
-ARG APP_PORT
 ARG NODE_VERSION
 
 # Install and configure system dependencies
-RUN apk add --no-cache build-base python3; \
+RUN apk add --no-cache build-base; \
   mkdir -p ${APP_HOME}; \
   chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
@@ -30,10 +28,10 @@ WORKDIR ${APP_HOME}
 USER ${APP_USER}
 
 # Copy base NPM files
-COPY --chown=${APP_USER}:${APP_USER} package.json yarn.lock ./
+COPY --chown=${APP_USER}:${APP_USER} package.json package-lock.json ./
 
 # Install dependencies
-RUN yarn cache clean --force && yarn install
+RUN npm cache clean --force && npm install
 
 # ============
 # Stage: Build
@@ -43,11 +41,10 @@ FROM node:${NODE_VERSION} as build
 ARG APP_NAME
 ARG APP_HOME
 ARG APP_USER
-ARG APP_PORT
 ARG NODE_VERSION
 
 # Install and configure system dependencies
-RUN apk add --no-cache build-base python3; \
+RUN apk add --no-cache build-base; \
   mkdir -p ${APP_HOME}; \
   chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
@@ -58,7 +55,7 @@ WORKDIR ${APP_HOME}
 USER ${APP_USER}
 
 # Copy base NPM files
-COPY --chown=${APP_USER}:${APP_USER} package.json yarn.lock ./
+COPY --chown=${APP_USER}:${APP_USER} package.json package-lock.json ./
 
 # Copy application dependencies from the "install" stage
 COPY --chown=${APP_USER}:${APP_USER} --from=install ${APP_HOME}/node_modules ./node_modules
@@ -67,12 +64,12 @@ COPY --chown=${APP_USER}:${APP_USER} --from=install ${APP_HOME}/node_modules ./n
 COPY --chown=${APP_USER}:${APP_USER} . .
 
 # Build the application
-RUN yarn build
+RUN npm run build
 
 # ============
 # Stage: Image
 # ============
-FROM node:${NODE_VERSION} as production
+FROM node:${NODE_VERSION}
 
 ARG APP_NAME
 ARG APP_HOME
@@ -80,8 +77,10 @@ ARG APP_USER
 ARG APP_PORT
 ARG NODE_VERSION
 
+ENV APP_PORT=${APP_PORT}
+
 # Install and configure system dependencies
-RUN apk add --no-cache build-base python3; \
+RUN apk add --no-cache build-base; \
   mkdir -p ${APP_HOME}; \
   chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
@@ -92,7 +91,7 @@ WORKDIR ${APP_HOME}
 USER ${APP_USER}
 
 # Copy base NPM files
-COPY --chown=${APP_USER}:${APP_USER} package.json yarn.lock ./
+COPY --chown=${APP_USER}:${APP_USER} package.json package-lock.json ./
 
 # Copy application dependencies from the "install" stage
 COPY --chown=${APP_USER}:${APP_USER} --from=install ${APP_HOME}/node_modules ./node_modules

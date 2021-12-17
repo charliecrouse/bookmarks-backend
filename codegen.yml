@@ -1,0 +1,10 @@
+overwrite: true
+schema: "./src/gql/schemas/*.graphql"
+documents: null
+generates:
+  src/schema.def.ts:
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - "typescript"
+      - "typescript-resolvers"
