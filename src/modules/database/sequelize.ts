@@ -1,12 +1,13 @@
 import config from 'config';
 import { Sequelize, SequelizeOptions } from 'sequelize-typescript';
+import { User, Bookmark, Session } from '../../models';
 
 const ENV = process.env['NODE_ENV'] || 'development';
 const DATABASE_NAME = `bookmarks-${ENV}`.toLowerCase();
 
 const DEFAULT_DATABASE_CONFIG: Partial<SequelizeOptions> = {
   database: DATABASE_NAME,
-  models: [],
+  models: [User, Bookmark, Session],
 };
 
 const DEVELOPMENT_DATABASE_CONFIG: SequelizeOptions = Object.assign({}, DEFAULT_DATABASE_CONFIG, {
@@ -41,4 +42,4 @@ if (!options[ENV]) {
   throw new Error(`Unsupported environment ${ENV}`);
 }
 
-const sequelize = new Sequelize(options[ENV]);
+export const sequelize = new Sequelize(options[ENV]);

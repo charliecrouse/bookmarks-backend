@@ -9,11 +9,6 @@
 
     /* Modules */
     "module": "CommonJS",
-    "baseUrl": "./src",
-    "paths": {
-      "@": ["./*"]
-    },
-    "declaration": true,
     "outDir": "./dist",
 
     /* Interop Constraints */
@@ -34,10 +29,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-
-  },
-  "include": [
-    "./src"
-  ]
+    "noPropertyAccessFromIndexSignature": true
+  }
 }

@@ -1,5 +1,6 @@
 app:
   port: 9001
 database:
+  host: 'localhost'
   username: 'postgres'
   password: 'password'

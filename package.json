@@ -25,6 +25,7 @@
     "class-validator": "^0.13.2",
     "config": "^3.3.6",
     "graphql": "^15.8.0",
+    "jsonwebtoken": "^8.5.1",
     "mongodb": "^4.2.2",
     "pg": "^8.7.1",
     "pg-hstore": "^2.3.4",

@@ -1,4 +1,5 @@
 type Bookmark {
+  id: Int!
   name: String!
   url: String
   parent: Bookmark

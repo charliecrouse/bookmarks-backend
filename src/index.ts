@@ -1,4 +1,7 @@
-import config from 'config';
+import 'reflect-metadata';
+import { bootstrapDatabase } from './modules/database';
 
-const port: number = config.get<number>('app.port');
-console.log(`The application is listening at http://localhost:${port}`);
+async function bootstrap() {
+  await bootstrapDatabase();
+}
+bootstrap();
