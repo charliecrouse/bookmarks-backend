@@ -10,6 +10,10 @@
     /* Modules */
     "module": "CommonJS",
     "outDir": "./dist",
+    "baseUrl": "./src",
+    "paths": {
+      "@*": ["./*"]
+    },
 
     /* Interop Constraints */
     "esModuleInterop": true,
@@ -29,6 +33,10 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true
+    "noPropertyAccessFromIndexSignature": true,
+  },
+  "ts-node": {
+    "files": true,
+    "require": ["tsconfig-paths/register"]
   }
 }

@@ -17,8 +17,7 @@ ARG APP_USER
 ARG NODE_VERSION
 
 # Install and configure system dependencies
-RUN apk add --no-cache build-base; \
-  mkdir -p ${APP_HOME}; \
+RUN mkdir -p ${APP_HOME}; \
   chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
 # Set the working directory
@@ -44,7 +43,8 @@ ARG APP_USER
 ARG NODE_VERSION
 
 # Install and configure system dependencies
-RUN apk add --no-cache build-base; \
+RUN apk add --no-cache g++ make python3; \
+  alias python="python3"; \
   mkdir -p ${APP_HOME}; \
   chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
@@ -80,7 +80,8 @@ ARG NODE_VERSION
 ENV APP_PORT=${APP_PORT}
 
 # Install and configure system dependencies
-RUN apk add --no-cache build-base; \
+RUN apk add --no-cache make g++ python3; \
+  alias python="python3"; \
   mkdir -p ${APP_HOME}; \
   chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
@@ -93,8 +94,8 @@ USER ${APP_USER}
 # Copy base NPM files
 COPY --chown=${APP_USER}:${APP_USER} package.json package-lock.json ./
 
-# Copy application dependencies from the "install" stage
-COPY --chown=${APP_USER}:${APP_USER} --from=install ${APP_HOME}/node_modules ./node_modules
+# Install production dependencies
+RUN npm cache clean --force && npm install --production
 
 # Copy application build from "build" stage
 COPY --chown=${APP_USER}:${APP_USER} --from=build ${APP_HOME}/build ./build
@@ -110,4 +111,4 @@ HEALTHCHECK --interval=5m --timeout=3s \
   CMD curl -f http://localhost:${PORT}/healthcheck || exit 1
 
 # Run application
-CMD [ "node", "build/index.js" ]
+CMD [ "npm", "run", "start" ]

@@ -1,13 +1,17 @@
 import config from 'config';
 import { Sequelize, SequelizeOptions } from 'sequelize-typescript';
-import { User, Bookmark, Session } from '../../models';
+
+import { User } from '@models/user';
+import { Bookmark } from '@models/bookmark';
+import { Token } from '@models/token';
 
 const ENV = process.env['NODE_ENV'] || 'development';
 const DATABASE_NAME = `bookmarks-${ENV}`.toLowerCase();
 
 const DEFAULT_DATABASE_CONFIG: Partial<SequelizeOptions> = {
   database: DATABASE_NAME,
-  models: [User, Bookmark, Session],
+  logging: false,
+  models: [User, Bookmark, Token],
 };
 
 const DEVELOPMENT_DATABASE_CONFIG: SequelizeOptions = Object.assign({}, DEFAULT_DATABASE_CONFIG, {

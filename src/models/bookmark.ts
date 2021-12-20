@@ -1,28 +1,24 @@
-import { Table, Model, Column, ForeignKey, Index } from "sequelize-typescript";
-import { User } from './user';
-
-interface BookmarkShape {
-  name: string;
-  url: string;
-}
+import { STRING, NUMBER } from 'sequelize';
+import { Table, Model, Column, ForeignKey, Index } from 'sequelize-typescript';
+import { User } from '@models/user';
 
 @Table({ timestamps: true, tableName: 'bookmarks' })
-export class Bookmark extends Model<Bookmark, BookmarkShape> implements BookmarkShape {
+export class Bookmark extends Model<BookmarkProps, BookmarkCreationProps> {
   // --------------------
   // Columns
   // --------------------
   @Column
   name!: string;
 
-  @Column({ allowNull: true })
-  url!: string;
+  @Column({ allowNull: true, type: STRING })
+  url!: Maybe<string>;
 
   // --------------------
   // Relations
   // --------------------
   @ForeignKey(() => Bookmark)
-  @Column({ allowNull: true })
-  parent?: number;
+  @Column({ allowNull: true, type: NUMBER })
+  parentId!: Maybe<number>;
 
   @Index
   @ForeignKey(() => User)
@@ -39,4 +35,4 @@ export class Bookmark extends Model<Bookmark, BookmarkShape> implements Bookmark
   get isFolder(): boolean {
     return !this.isBookmark;
   }
-};
+}

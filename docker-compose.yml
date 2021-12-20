@@ -1,18 +1,18 @@
 version: "3.3"
 
 services:
-  user-service:
-    
   bookmarks-backend:
     build:
       context: ./
       dockerfile: Dockerfile
-    command: /bin/sh -c 'yarn install && yarn run dev'
+      target: install
+    command: /bin/sh -c 'npm install && npm run dev'
     container_name: bookmarks-backend
     environment:
       - NODE_ENV=development
+      - DOCKER=true
     ports:
-      - 5000:5000
+      - 9001:9001
       - 9229:9229
     networks:
       - bookmarks-net
@@ -26,7 +26,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=bookmarks-backend-development
+      - POSTGRES_DB=bookmarks-development
     ports:
       - 5432:5432
     networks:
@@ -40,4 +40,4 @@ networks:
   bookmarks-net:
 
 volumes:
-  bookmarks-backend-postgres-vol:
+  bookmarks-backend-postgres:

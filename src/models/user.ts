@@ -1,12 +1,7 @@
 import { Table, Column, Model } from 'sequelize-typescript';
 
-interface UserShape {
-  email: string;
-  password: string;
-}
-
 @Table({ timestamps: true, tableName: 'users' })
-export class User extends Model<User, UserShape> implements UserShape {
+export class User extends Model<UserShape, UserCreationProps> implements UserShape {
   // --------------------
   // Columns
   // --------------------
@@ -15,8 +10,4 @@ export class User extends Model<User, UserShape> implements UserShape {
 
   @Column
   password!: string;
-
-  // --------------------
-  // RELATIONS
-  // --------------------
 }
