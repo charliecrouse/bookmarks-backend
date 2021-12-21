@@ -5,7 +5,7 @@ import { Table, Model, Column, ForeignKey, Index } from 'sequelize-typescript';
 import { User } from '@models/user';
 
 @Table({ timestamps: false, tableName: 'tokens' })
-export class Token extends Model<TokenShape, TokenCreationProps> {
+export class Token extends Model<TokenProps, TokenCreationProps> {
   // --------------------
   // Columns
   // --------------------

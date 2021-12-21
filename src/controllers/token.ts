@@ -22,7 +22,7 @@ export const createToken = async (ownerEmail: string, role = 'user'): Promise<To
   return token.save();
 };
 
-export const findTokenByJWT = async (jwt: string): Promise<Token> => {
+export const findTokenByJWT = async (jwt: string): Promise<TokenProps> => {
   const token = await Token.findByPk(jwt, { raw: true });
 
   if (!token) {

@@ -24,7 +24,7 @@ export const createUser = async (props: UserCreationProps): Promise<User> => {
   return new User(payload).save();
 };
 
-export const findUserByEmail = async (email: string): Promise<User> => {
+export const findUserByEmail = async (email: string): Promise<UserProps> => {
   const user = await User.findByPk(email, { raw: true });
 
   if (!user) {
@@ -35,7 +35,10 @@ export const findUserByEmail = async (email: string): Promise<User> => {
   return user;
 };
 
-export const findUserByCredentials = async (email: string, password: string): Promise<User> => {
+export const findUserByCredentials = async (
+  email: string,
+  password: string,
+): Promise<UserProps> => {
   const user = await findUserByEmail(email);
 
   const hasValidCredentials = await c.verify(password, user.password);

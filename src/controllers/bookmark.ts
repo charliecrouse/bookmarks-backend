@@ -3,21 +3,12 @@ import { Bookmark } from '@models/bookmark';
 import { findUserByEmail } from '@controllers/user';
 import { bookmarkCreationSchema } from '@validators/bookmark';
 
-/*
-import * as e from '../utils/error';
-
-import { findUserByEmail } from './user';
-import { Bookmark } from '../models/bookmark';
-import { bookmarkCreationSchema } from '../validators/bookmark';
-*/
-
 export const findOwnedBookmarks = async (ownerEmail: string): Promise<Bookmark[]> => {
   // Verify that a User exists with the given email
   await findUserByEmail(ownerEmail);
 
   return Bookmark.findAll({
     where: { ownerEmail },
-    raw: true,
   });
 };
 
@@ -55,7 +46,7 @@ export const createOwnedBookmark = async (props: BookmarkCreationProps): Promise
   const parentIsValid = await validateParentId(props.parentId, props.ownerEmail);
 
   if (!parentIsValid) {
-    const message = `Failed to create Bookmark because the given parentId is invalid, ${props.parentId}`;
+    const message = `Failed to create Bookmark because the given parentId, ${props.parentId}, is invalid`;
     return Promise.reject(new e.ClientError(message));
   }
 
