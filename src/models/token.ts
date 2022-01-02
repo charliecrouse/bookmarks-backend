@@ -1,48 +1,33 @@
-import config from 'config';
-import { JwtPayload, verify } from 'jsonwebtoken';
-import { Table, Model, Column, ForeignKey, Index } from 'sequelize-typescript';
+import { Db } from 'mongodb';
+import { types, schema } from 'papr';
+import { papr } from '@modules/database/papr';
 
-import { User } from '@models/user';
+const tokenSchema = schema(
+  {
+    // --------------------
+    // Properties
+    // --------------------
+    jwt: types.string({ required: true }),
 
-@Table({ timestamps: false, tableName: 'tokens' })
-export class Token extends Model<TokenProps, TokenCreationProps> {
-  // --------------------
-  // Columns
-  // --------------------
-  @Column({ primaryKey: true })
-  jwt!: string;
+    // --------------------
+    // Relations
+    // --------------------
+    ownerEmail: types.string({ required: true }),
+  },
+  { timestamps: false },
+);
 
-  // --------------------
-  // Relations
-  // --------------------
-  @Index
-  @Column
-  @ForeignKey(() => User)
-  ownerEmail!: string;
+export const Token = papr.model('tokens', tokenSchema);
 
-  // --------------------
-  // Helpers
-  // --------------------
-  static get secret(): string {
-    return config.get<string>('jwt.secret');
-  }
+export type TokenProps = typeof tokenSchema[0];
+export type TokenCreationProps = Optional<TokenProps, '_id'>;
 
-  get decoded(): JwtPayload {
-    return verify(this.jwt, Token.secret) as JwtPayload;
-  }
-
-  get role(): string {
-    return this.decoded['role'] || 'user';
-  }
-
-  get exp(): Date {
-    const { exp } = this.decoded;
-
-    if (!exp) return new Date();
-    return new Date(exp);
-  }
-
-  get isExpired(): boolean {
-    return this.exp <= new Date();
-  }
-}
+export const createTokenIndexes = async (db: Db) => {
+  await db.createIndex(
+    'tokens',
+    {
+      jwt: 1,
+    },
+    { unique: true, expireAfterSeconds: 60 * 30 },
+  );
+};

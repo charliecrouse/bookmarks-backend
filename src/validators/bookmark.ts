@@ -5,4 +5,4 @@ export const bookmarkCreationSchema = Joi.object({
   url: Joi.string().uri(),
   parentId: Joi.number(),
   ownerEmail: Joi.string().required(),
-});
+}).unknown(true);

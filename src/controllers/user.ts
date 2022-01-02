@@ -1,9 +1,9 @@
 import * as c from '@utils/crypto';
 import * as e from '@utils/error';
-import { User } from '@models/user';
+import { User, UserProps, UserCreationProps } from '@models/user';
 import { userCreationSchema } from '@validators/user';
 
-export const createUser = async (props: UserCreationProps): Promise<User> => {
+export const createUser = async (props: UserCreationProps): Promise<UserProps> => {
   const { error } = userCreationSchema.validate(props);
 
   if (error) {
@@ -11,7 +11,7 @@ export const createUser = async (props: UserCreationProps): Promise<User> => {
     return Promise.reject(new e.ValidationError(message));
   }
 
-  const existing = await User.findByPk(props.email, { raw: true });
+  const existing = await User.findOne({ email: props.email });
 
   if (existing) {
     const message = `User with email, "${props.email}", already exists`;
@@ -21,11 +21,11 @@ export const createUser = async (props: UserCreationProps): Promise<User> => {
   const encrypted = await c.encrypt(props.password);
   const payload = Object.assign({}, props, { password: encrypted });
 
-  return new User(payload).save();
+  return User.insertOne(payload);
 };
 
 export const findUserByEmail = async (email: string): Promise<UserProps> => {
-  const user = await User.findByPk(email, { raw: true });
+  const user = await User.findOne({ email });
 
   if (!user) {
     const message = `Failed to find User with email, \"${email}\"`;

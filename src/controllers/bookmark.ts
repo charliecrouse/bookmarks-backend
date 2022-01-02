@@ -1,38 +1,38 @@
+import { ObjectId } from 'mongodb';
+
 import * as e from '@utils/error';
-import { Bookmark } from '@models/bookmark';
+import { Bookmark, BookmarkProps, BookmarkCreationProps } from '@models/bookmark';
 import { findUserByEmail } from '@controllers/user';
 import { bookmarkCreationSchema } from '@validators/bookmark';
 
-export const findOwnedBookmarks = async (ownerEmail: string): Promise<Bookmark[]> => {
+export const findOwnedBookmarks = async (ownerEmail: string): Promise<BookmarkProps[]> => {
   // Verify that a User exists with the given email
   await findUserByEmail(ownerEmail);
 
-  return Bookmark.findAll({
-    where: { ownerEmail },
-  });
+  return Bookmark.find({ ownerEmail });
 };
 
-export const findOwnedBookmarkById = async (id: number, ownerEmail: string): Promise<Bookmark> => {
+export const findOwnedBookmarkById = async (
+  _id: string,
+  ownerEmail: string,
+): Promise<BookmarkProps> => {
   // Verify that a User exists with the given email
   await findUserByEmail(ownerEmail);
 
   const bookmark = await Bookmark.findOne({
-    where: {
-      id,
-      ownerEmail,
-    },
-    raw: true,
+    ownerEmail,
+    _id: new ObjectId(_id),
   });
 
   if (!bookmark) {
-    const message = `Failed to find Bookmark with id, "${id}" and owner "${ownerEmail}"`;
+    const message = `Failed to find Bookmark with id, "${_id}" and owner "${ownerEmail}"`;
     return Promise.reject(new e.ClientError(message, 401));
   }
 
   return bookmark;
 };
 
-export const createOwnedBookmark = async (props: BookmarkCreationProps): Promise<Bookmark> => {
+export const createOwnedBookmark = async (props: BookmarkCreationProps): Promise<BookmarkProps> => {
   const { error } = bookmarkCreationSchema.validate(props);
 
   if (error) {
@@ -50,13 +50,20 @@ export const createOwnedBookmark = async (props: BookmarkCreationProps): Promise
     return Promise.reject(new e.ClientError(message));
   }
 
-  const bookmark = new Bookmark(props);
-  return bookmark.save();
+  return Bookmark.insertOne(props);
 };
 
-const validateParentId = async (parentId: Maybe<number>, ownerEmail: string): Promise<boolean> => {
+const validateParentId = async (parentId: Maybe<string>, ownerEmail: string): Promise<boolean> => {
   if (parentId == undefined) return true;
 
   const parent = await findOwnedBookmarkById(parentId, ownerEmail);
-  return parent.isFolder;
+  return isFolder(parent);
+};
+
+const isBookmark = (bookmark: BookmarkProps): boolean => {
+  return !!bookmark.url;
+};
+
+const isFolder = (bookmark: BookmarkProps): boolean => {
+  return !isBookmark(bookmark);
 };

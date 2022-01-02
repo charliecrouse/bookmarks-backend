@@ -1,8 +1,6 @@
 app:
   port: 9001
-database:
-  host: 'localhost'
-  username: 'postgres'
-  password: 'password'
+mongo:
+  uri: 'mongodb://root:password@localhost:27017'
 jwt:
   secret: 'secret'

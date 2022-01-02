@@ -10,7 +10,7 @@ bookmarksRouter.use(wrapAsync(wrapAuth));
 bookmarksRouter.get(
   '/',
   wrapAsync(async (req, res) => {
-    const user = (req as AuthenticatedRequest).body.user;
+    const { user } = req.body;
     const bookmarks = await findOwnedBookmarks(user.email);
     res.status(200).json(bookmarks);
   }),
@@ -19,16 +19,11 @@ bookmarksRouter.get(
 bookmarksRouter.post(
   '/',
   wrapAsync(async (req, res) => {
-    const { user } = (req as AuthenticatedRequest).body;
+    const { user } = req.body;
 
-    const props: BookmarkCreationProps = {
-      ownerEmail: user.email,
-      name: req.body.name,
-      url: req.body.url,
-      parentId: req.body.parentId,
-    };
-
+    const props = Object.assign({}, req.body, { ownerEmail: user.email });
     const bookmark = await createOwnedBookmark(props);
-    res.status(201).json(bookmark.toJSON());
+
+    res.status(201).json(bookmark);
   }),
 );

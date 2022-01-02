@@ -1,5 +1,5 @@
-import { sequelize } from '@modules/database/sequelize';
+import { connect } from '@modules/database/papr';
 
 export const bootstrapDatabase = async () => {
-  await sequelize.sync();
+  await connect();
 };
