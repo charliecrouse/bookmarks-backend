@@ -46,7 +46,6 @@ build/
 
 # Typescript Output
 dist/
-@types/
 
 # TypeScript v1 declaration files
 typings/
