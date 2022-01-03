@@ -14,7 +14,7 @@ const tokenSchema = schema(
     // --------------------
     ownerEmail: types.string({ required: true }),
   },
-  { timestamps: false },
+  { timestamps: true },
 );
 
 export const Token = papr.model('tokens', tokenSchema);
@@ -23,11 +23,20 @@ export type TokenProps = typeof tokenSchema[0];
 export type TokenCreationProps = Optional<TokenProps, '_id'>;
 
 export const createTokenIndexes = async (db: Db) => {
-  await db.createIndex(
-    'tokens',
-    {
-      jwt: 1,
-    },
-    { unique: true, expireAfterSeconds: 60 * 30 },
-  );
+  await Promise.all([
+    db.createIndex(
+      'tokens',
+      {
+        jwt: 1,
+      },
+      { unique: true },
+    ),
+    db.createIndex(
+      'tokens',
+      {
+        createdAt: 1,
+      },
+      { expireAfterSeconds: 60 * 30 },
+    ),
+  ]);
 };
