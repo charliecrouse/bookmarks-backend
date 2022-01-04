@@ -78,6 +78,7 @@ ARG APP_PORT
 ARG NODE_VERSION
 
 ENV APP_PORT=${APP_PORT}
+ENV NODE_ENV=development
 
 # Install and configure system dependencies
 RUN apk add --no-cache make g++ python3; \
@@ -98,7 +99,7 @@ COPY --chown=${APP_USER}:${APP_USER} package.json package-lock.json ./
 RUN npm cache clean --force && npm install --production
 
 # Copy application build from "build" stage
-COPY --chown=${APP_USER}:${APP_USER} --from=build ${APP_HOME}/build ./build
+COPY --chown=${APP_USER}:${APP_USER} --from=build ${APP_HOME}/dist ./dist
 
 # Copy application source
 COPY --chown=${APP_USER}:${APP_USER} . .

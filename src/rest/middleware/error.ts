@@ -17,6 +17,6 @@ export const handleErrors = (
     message = err.message;
   }
 
-  console.error(err);
+  console.log(JSON.stringify(err, null, 2));
   res.status(statusCode).send({ message });
 };

@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import {} from 'papr';
 
 import * as e from '@utils/error';
 import { Bookmark, BookmarkProps, BookmarkCreationProps } from '@models/bookmark';
@@ -43,14 +44,17 @@ export const createOwnedBookmark = async (props: BookmarkCreationProps): Promise
   // Verify that a User exists with the given email
   await findUserByEmail(props.ownerEmail);
 
-  const parentIsValid = await validateParentId(props.parentId, props.ownerEmail);
+  const parentIsValid = await validateParentId(props.parentId?.toString(), props.ownerEmail);
 
   if (!parentIsValid) {
     const message = `Failed to create Bookmark because the given parentId, ${props.parentId}, is invalid`;
     return Promise.reject(new e.ClientError(message));
   }
 
-  return Bookmark.insertOne(props);
+  return Bookmark.insertOne({
+    ...props,
+    parentId: new ObjectId(props.parentId),
+  });
 };
 
 const validateParentId = async (parentId: Maybe<string>, ownerEmail: string): Promise<boolean> => {
