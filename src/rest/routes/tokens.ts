@@ -19,7 +19,7 @@ tokensRouter.post(
   '/:jwt',
   wrapAsync(async (req, res) => {
     const existingToken = await findTokenByJWT(req.params['jwt']);
-    const token = await createToken(existingToken.ownerEmail);
-    res.status(201).json({ token });
+    const refreshedToken = await createToken(existingToken.ownerEmail);
+    res.status(201).json({ token: refreshedToken });
   }),
 );

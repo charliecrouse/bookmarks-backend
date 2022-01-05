@@ -9,7 +9,7 @@
 #### Request
 
 ```sh
-POST /signup HTTP/1.1
+POST /users HTTP/1.1
 Content-Type: application/json
 
 {
@@ -32,7 +32,7 @@ Content-Type: application/json
 #### Request
 
 ```sh
-POST /signin HTTP/1.1
+POST /tokens HTTP/1.1
 Content-Type: application/json
 
 {
@@ -45,29 +45,13 @@ Content-Type: application/json
 
 ```json
 {
-  "jwt": "<jwt>",
-  "ownerEmail": "test@test.com"
-}
-```
-
-### Refresh
-
-```sh
-POST /refresh HTTP/1.1
-Content-Type: application/json
-
-{
-    "email": "test@test.com",
-    "password": "password"
-}
-```
-
-#### Sample Response
-
-```json
-{
-  "jwt": "<jwt>",
-  "ownerEmail": "test@test.com"
+    "token": {
+        "_id": "61d4e536ecf80d1d2d11d13c",
+        "createdAt": "2022-01-05T00:24:22.765Z",
+        "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoidXNlciIsImV4cCI6MTY0MTM0NDA2Mjc2NCwiaWF0IjoxNjQxMzQyMjYyfQ.L5FtEsfFcWeqFEeAHhqpTXj5lW_l47bHLXr1o1OtKEQ",
+        "ownerEmail": "test@test.com",
+        "updatedAt": "2022-01-05T00:24:22.765Z"
+    }
 }
 ```
 

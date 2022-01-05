@@ -23,9 +23,7 @@ const bookmarkSchema = schema(
 export const Bookmark = papr.model('bookmarks', bookmarkSchema);
 
 export type BookmarkProps = typeof bookmarkSchema[0];
-export type BookmarkCreationProps = Optional<BookmarkProps, '_id' | 'createdAt' | 'updatedAt'> & {
-  parentId: Maybe<string>;
-}
+export type BookmarkCreationProps = Optional<BookmarkProps, MongoGeneratedProps>;
 
 export const createBookmarkIndexes = async (db: Db) => {
   await db.createIndex('bookmarks', { ownerEmail: 1, parentId: 1 });

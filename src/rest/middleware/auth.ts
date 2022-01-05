@@ -42,6 +42,7 @@ export const wrapAuth = async (req: Request, _res: Response, next: NextFunction)
   const user = await findUserByEmail(token.ownerEmail);
 
   req.body.user = user;
+  req.body.ownerEmail = user.email;
   req.body.token = token;
   next();
 };

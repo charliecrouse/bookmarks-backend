@@ -5,7 +5,9 @@ import { MongoClient } from 'mongodb';
 const ENV: string = process.env['NODE_ENV'] || 'development';
 
 export const MONGO_URI: Record<string, string> = {
-  development: process.env['DOCKER'] ? config.get<string>('mongo.docker_uri') : config.get<string>('mongo.uri'),
+  development: process.env['DOCKER']
+    ? config.get<string>('mongo.docker_uri')
+    : config.get<string>('mongo.uri'),
   production: config.get<string>('mongo.uri'),
   testing: config.get<string>('mongo.uri'),
 };
