@@ -1,44 +1,42 @@
-import * as jwt from 'jsonwebtoken';
+import { Db } from 'mongodb';
+import { types, schema } from 'papr';
+import { papr } from '@modules/database/papr';
 
-import { Model, Column, Table, ForeignKey } from 'sequelize-typescript';
+const tokenSchema = schema(
+  {
+    // --------------------
+    // Properties
+    // --------------------
+    jwt: types.string({ required: true }),
 
-import { User } from './user';
+    // --------------------
+    // Relations
+    // --------------------
+    ownerEmail: types.string({ required: true }),
+  },
+  { timestamps: true },
+);
 
-export interface TokenShape {
-  jwt: string;
-  ownerEmail: string;
-}
+export const Token = papr.model('tokens', tokenSchema);
 
-export interface JWTShape {
-  role: string;
-  expires: Date;
-}
+export type TokenProps = typeof tokenSchema[0];
+export type TokenCreationProps = Optional<TokenProps, '_id'>;
 
-@Table({ timestamps: false })
-export class Token extends Model<Token, TokenShape> implements TokenShape {
-  @Column({ primaryKey: true })
-  jwt!: string;
-
-  @ForeignKey(() => User)
-  ownerEmail!: string;
-
-  static getSecret(): string {
-    return process.env.JWT_SECRET || 'secret';
-  }
-
-  get decoded(): JWTShape {
-    return jwt.verify(this.jwt, Token.getSecret()) as JWTShape;
-  }
-
-  get role(): string {
-    return this.decoded.role;
-  }
-
-  get expires(): Date {
-    return this.decoded.expires;
-  }
-
-  get isExpired(): boolean {
-    return this.expires <= new Date();
-  }
-}
+export const createTokenIndexes = async (db: Db) => {
+  await Promise.all([
+    db.createIndex(
+      'tokens',
+      {
+        jwt: 1,
+      },
+      { unique: true },
+    ),
+    db.createIndex(
+      'tokens',
+      {
+        createdAt: 1,
+      },
+      { expireAfterSeconds: 60 * 30 },
+    ),
+  ]);
+};

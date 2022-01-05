@@ -5,37 +5,34 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    command: /bin/sh -c 'yarn install && yarn run dev'
     container_name: bookmarks-backend
     environment:
       - NODE_ENV=development
+      - DOCKER=true
     ports:
-      - 5000:5000
-      - 9229:9229
+      - 9001:9001
     networks:
       - bookmarks-net
-    volumes:
-      - type: bind
-        source: ./
-        target: /home/node/bookmarks-backend
-  postgres:
-    image: postgres:latest
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:latest
+    container_name: bookmarks-backend-mongo
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=bookmarks-backend-development
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
     ports:
-      - 5432:5432
+      - 27017:27017
     networks:
       - bookmarks-net
     volumes:
       - type: volume
-        source: bookmarks-backend-postgres-vol
-        target: /var/lib/postgresql/data
+        source: bookmarks-backend-mongo
+        target: /data/db
 
 networks:
   bookmarks-net:
 
 volumes:
-  bookmarks-backend-postgres-vol:
+  bookmarks-backend-mongo:

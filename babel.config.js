@@ -9,4 +9,13 @@ module.exports = {
       },
     ],
   ],
+  plugins: [
+    [
+      'babel-plugin-root-import',
+      {
+        rootPathSuffix: 'build/',
+        rootPathPrefix: '@',
+      },
+    ],
+  ],
 };

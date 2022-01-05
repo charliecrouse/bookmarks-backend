@@ -1,17 +1,10 @@
-import { connectToDatabase } from './database';
-import { createApp } from './server';
+import 'reflect-metadata';
 
-async function main(): Promise<void> {
-  await connectToDatabase();
+import { bootstrapDatabase } from '@modules/database';
+import { bootstrapApp } from '@rest';
 
-  const app = createApp();
-  const port: number = app.get('PORT');
-
-  await app.listen(port);
-  console.log(`Application is up at http://localhost:${port}`);
+async function bootstrap() {
+  await bootstrapDatabase();
+  await bootstrapApp();
 }
-
-main().catch(err => {
-  console.error(err);
-  return process.exit();
-});
+bootstrap();

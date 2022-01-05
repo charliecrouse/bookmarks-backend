@@ -1,30 +1,29 @@
-import { Table, Column, Model, HasMany } from 'sequelize-typescript';
+import { Db } from 'mongodb';
+import { schema, types } from 'papr';
+import { papr } from '@modules/database/papr';
 
-import { Token } from './token';
-import { Bookmark } from './bookmark';
+const userSchema = schema(
+  {
+    // --------------------
+    // Properties
+    // --------------------
+    email: types.string({ required: true }),
+    password: types.string({ required: true }),
+  },
+  { timestamps: true },
+);
 
-export interface UserShape {
-  email: string;
-  password: string;
-}
+export const User = papr.model('users', userSchema);
 
-@Table({ timestamps: true })
-export class User extends Model<User, UserShape> implements UserShape {
-  // --------------------------------------------
-  // COLUMNS
-  // --------------------------------------------
-  @Column({ primaryKey: true })
-  email!: string;
+export type UserProps = typeof userSchema[0];
+export type UserCreationProps = Optional<UserProps, '_id'>;
 
-  @Column
-  password!: string;
-
-  // --------------------------------------------
-  // DERIVED FIELDS
-  // --------------------------------------------
-  @HasMany(() => Token)
-  tokens!: Token[];
-
-  @HasMany(() => Bookmark)
-  bookmarks!: Bookmark[];
-}
+export const createUserIndexes = async (db: Db) => {
+  await db.createIndex(
+    'users',
+    {
+      email: 1,
+    },
+    { unique: true },
+  );
+};
