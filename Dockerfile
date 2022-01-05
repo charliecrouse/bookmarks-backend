@@ -44,7 +44,6 @@ ARG NODE_VERSION
 
 # Install and configure system dependencies
 RUN apk add --no-cache g++ make python3; \
-  alias python="python3"; \
   mkdir -p ${APP_HOME}; \
   chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
@@ -75,14 +74,12 @@ ARG APP_NAME
 ARG APP_HOME
 ARG APP_USER
 ARG APP_PORT
-ARG NODE_VERSION
 
 ENV APP_PORT=${APP_PORT}
 ENV NODE_ENV=development
 
 # Install and configure system dependencies
 RUN apk add --no-cache make g++ python3; \
-  alias python="python3"; \
   mkdir -p ${APP_HOME}; \
   chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
@@ -99,7 +96,7 @@ COPY --chown=${APP_USER}:${APP_USER} package.json package-lock.json ./
 RUN npm cache clean --force && npm install --production
 
 # Copy application build from "build" stage
-COPY --chown=${APP_USER}:${APP_USER} --from=build ${APP_HOME}/dist ./dist
+COPY --chown=${APP_USER}:${APP_USER} --from=build ${APP_HOME}/build ./build
 
 # Copy application source
 COPY --chown=${APP_USER}:${APP_USER} . .
@@ -108,8 +105,8 @@ COPY --chown=${APP_USER}:${APP_USER} . .
 EXPOSE ${APP_PORT}
 
 # Configure healthcheck
-HEALTHCHECK --interval=5m --timeout=3s \
-  CMD curl -f http://localhost:${PORT}/healthcheck || exit 1
+# HEALTHCHECK --interval=5m --timeout=3s \
+  # CMD curl -f http://localhost:${PORT}/healthcheck || exit 1
 
 # Run application
 CMD [ "npm", "run", "start" ]
