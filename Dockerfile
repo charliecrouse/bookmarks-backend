@@ -105,8 +105,8 @@ COPY --chown=${APP_USER}:${APP_USER} . .
 EXPOSE ${APP_PORT}
 
 # Configure healthcheck
-# HEALTHCHECK --interval=5m --timeout=3s \
-  # CMD curl -f http://localhost:${PORT}/healthcheck || exit 1
+HEALTHCHECK --interval=5m --timeout=3s \
+  CMD curl -f http://localhost:${APP_PORT}/healthcheck || exit 1
 
 # Run application
 CMD [ "npm", "run", "start" ]
