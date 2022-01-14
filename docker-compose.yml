@@ -8,7 +8,9 @@ services:
     container_name: bookmarks-backend
     environment:
       - NODE_ENV=development
-      - DOCKER=true
+      - PORT=9001
+      - MONGO_URI=mongodb://bookmarks-backend-mongo:27017
+      - JWT_SECRET=secret
     ports:
       - 9001:9001
     networks:
@@ -19,9 +21,6 @@ services:
     image: mongo:latest
     container_name: bookmarks-backend-mongo
     restart: always
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=password
     ports:
       - 27017:27017
     networks:

@@ -1,7 +1,0 @@
-app:
-  port: 9001
-mongo:
-  uri: 'mongodb://root:password@localhost:27017'
-  docker_uri: 'mongodb://root:password@bookmarks-backend-mongo:27017'
-jwt:
-  secret: 'secret'

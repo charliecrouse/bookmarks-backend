@@ -1,4 +1,3 @@
-import config from 'config';
 import addMinutes from 'date-fns/addMinutes';
 import { sign, verify, JwtPayload } from 'jsonwebtoken';
 
@@ -6,7 +5,7 @@ import * as e from '@utils/error';
 import { Token, TokenProps } from '@models/token';
 import { findUserByEmail } from '@controllers/user';
 
-const JWT_SECRET = config.get<string>('jwt.secret');
+const JWT_SECRET: string = process.env['JWT_SECRET'] || 'secret';
 
 export const createToken = async (ownerEmail: string, role = 'user'): Promise<TokenProps> => {
   // Verify that a User exists with the given email
