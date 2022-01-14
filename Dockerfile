@@ -14,10 +14,11 @@ FROM node:${NODE_VERSION} as install
 ARG APP_NAME
 ARG APP_HOME
 ARG APP_USER
-ARG NODE_VERSION
+ARG APP_HOME
 
 # Install and configure system dependencies
-RUN mkdir -p ${APP_HOME}; \
+RUN apk add --no-cache make gcc g++ python3; \
+  mkdir -p ${APP_HOME}; \
   chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 
 # Set the working directory
@@ -32,6 +33,9 @@ COPY --chown=${APP_USER}:${APP_USER} package.json package-lock.json ./
 # Install dependencies
 RUN npm cache clean --force && npm install
 
+# Copy application source
+COPY --chown=${APP_USER}:${APP_USER} . .
+
 # ============
 # Stage: Build
 # ============
@@ -43,7 +47,7 @@ ARG APP_USER
 ARG NODE_VERSION
 
 # Install and configure system dependencies
-RUN apk add --no-cache g++ make python3; \
+RUN apk add --no-cache make gcc g++ python3; \
   mkdir -p ${APP_HOME}; \
   chown -R ${APP_USER}:${APP_USER} ${APP_HOME};
 

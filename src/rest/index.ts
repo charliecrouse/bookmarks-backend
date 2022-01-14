@@ -5,7 +5,7 @@ export const bootstrapApp = async (): Promise<void> => {
 
   return new Promise((resolve) => {
     app.listen(port, (): void => {
-      console.log(`Application is up at http://localhost:${port}`);
+      console.log(`The application is up at http://localhost:${port}`);
       return resolve();
     });
   });

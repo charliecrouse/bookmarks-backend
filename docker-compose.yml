@@ -1,22 +1,26 @@
-version: "3.3"
+version: "3.4"
 
 services:
   bookmarks-backend:
+    depends_on:
+      - mongo
+    container_name: bookmarks-backend
     build:
       context: ./
       dockerfile: Dockerfile
-    container_name: bookmarks-backend
+      target: install
+    env_file:
+      - .env.development
     environment:
-      - NODE_ENV=development
-      - PORT=9001
       - MONGO_URI=mongodb://bookmarks-backend-mongo:27017
-      - JWT_SECRET=secret
     ports:
-      - 9001:9001
+      - ${PORT:9001}:${PORT:9001}
+    command: ["npm", "run", "dev"]
+    volumes:
+      - .:/home/node/bookmarks-backend
+      - /home/node/bookmarks-backend/node_modules
     networks:
       - bookmarks-net
-    depends_on:
-      - mongo
   mongo:
     image: mongo:latest
     container_name: bookmarks-backend-mongo
