@@ -14,7 +14,7 @@ services:
     environment:
       - MONGO_URI=mongodb://bookmarks-backend-mongo:27017
     ports:
-      - ${PORT:9001}:${PORT:9001}
+      - ${PORT:-9001}:${PORT:-9001}
     command: ["npm", "run", "dev"]
     volumes:
       - .:/home/node/bookmarks-backend
